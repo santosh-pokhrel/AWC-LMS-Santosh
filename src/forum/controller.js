@@ -64,10 +64,10 @@ export class ForumController {
     }
 
     wireEvents() {
-        this.view.onCreatePost(async ({ copy }) => {
+        this.view.onCreatePost(async ({ copy, fileMeta }) => {
             if (!copy) return alert("Please write something before posting.");
             try {
-                const result = await this.model.createPost({ authorId: this.currentAuthorId, copy });
+                const result = await this.model.createPost({ authorId: this.currentAuthorId, copy, fileMeta });
                 if (result?.isCancelling) {
                     alert("Error while cancelling the records");
                     return;

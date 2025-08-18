@@ -160,6 +160,11 @@ textarea::placeholder {
     opacity: 1;
 }
 
+ 
+textarea:focus-visible{
+    outline: none;
+}
+
 .create-post-buttons
 span {
     font-size: 12px;

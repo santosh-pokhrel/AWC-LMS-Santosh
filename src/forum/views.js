@@ -1,3 +1,4 @@
+import { uploadAndGetFileLink } from '../utils/upload.js';
 
 // export class ForumView {
 //     constructor({ mountId, modalRootId, postTextareaId, postButtonId }) {
@@ -211,10 +212,27 @@ export class ForumView {
 
   onCreatePost(handler) {
     if (!this.postButton) return;
-    this.postButton.addEventListener("click", (e) => {
+    this.postButton.addEventListener("click", async (e) => {
       e.preventDefault();
       const copy = (this.postTextarea?.value ?? "").trim();
-      handler?.({ copy });
+      const fileInput = document.getElementById('postFile');
+      let fileMeta = null;
+      if (fileInput && fileInput.files && fileInput.files[0]) {
+        const file = fileInput.files[0];
+        try {
+          const file_link = await uploadAndGetFileLink(file);
+          fileMeta = {
+            file_name: file.name,
+            file_link,
+            file_type: file.type,
+            file_size: file.size,
+          };
+        } catch (err) {
+          alert('File upload failed: ' + err.message);
+          return;
+        }
+      }
+      handler?.({ copy, fileMeta });
     });
   }
 

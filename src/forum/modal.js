@@ -248,13 +248,20 @@ export class ForumModel {
         } catch { }
     }
 
-    async createPost({ authorId, copy }) {
+    async createPost({ authorId, copy, fileMeta }) {
         let postquery = eduflowproForumPostmodel.mutation()
-        postquery.createOne({
+        const payload = {
             published_date: Math.floor(Date.now() / 1000).toString(),
             author_id: authorId,
             copy: copy
-        });
+        };
+        if (fileMeta && fileMeta.file_link) {
+            payload.file_name = fileMeta.file_name;
+            payload.file_link = fileMeta.file_link;
+            payload.file_type = fileMeta.file_type;
+            payload.file_size = fileMeta.file_size;
+        }
+        postquery.createOne(payload);
         const result = await postquery.execute(true).toPromise();
         return result;
     }
