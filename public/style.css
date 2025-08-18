@@ -229,3 +229,16 @@ span {
 .roundedButton.is-voted .vote-count {
     color: white !important;
 }
+
+#post-data{
+    outline: none;
+}
+
+.highlight{
+    color: rgb(69, 134, 177);
+}
+
+.mention{
+    color:rgb(69, 134, 177)
+    
+}

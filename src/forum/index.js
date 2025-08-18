@@ -38,6 +38,7 @@ import { ForumView } from "../forum/views.js";
             modalRootId: "modal-root",
             postTextareaId: "post-data",
             postButtonId: "post-button",
+            model: model
         });
         const controller = new ForumController(model, view);
 

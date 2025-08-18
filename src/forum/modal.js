@@ -1,179 +1,9 @@
-// import { registerTemplates, mapper } from "../utils/helper.js";
-
-// export class ForumModel {
-//     constructor(plugin, modelName = "EduflowproForumPost") {
-//         this.plugin = plugin;
-//         this.model = plugin.switchTo(modelName);
-//         this.limit = 500;
-//         this.offset = 0;
-//         this.query = null;                 
-//         this.subscriptions = new Set();    
-
-//         this.init();
-//     }
-
-//     /* --------------------------- Lifecycle --------------------------- */
-
-//     async init() {
-//         this.buildQuery();
-//         await this.fetchPosts();           // initial fetch
-//         this.subscribeToPosts();           // live updates
-//         this.setupModelSubscription();     // optional safety net
-//     }
-
-//     destroy() {
-//         this.unsubscribeAll();
-//         if (this.query?.destroy) this.query.destroy();
-//         this.query = null;
-//     }
-
-//     /* --------------------------- Query Setup ------------------------- */
-
-//     buildQuery() {
-//         // Use a stateful dataset query so fetch() populates local state,
-//         // and subscribe() streams changes for the same dataset.
-//         this.query = this.model
-//             .query()
-//             .where("forum_status", "Published - Not flagged")
-//             .orderBy("created_at", "desc")
-//             .limit(this.limit)
-//             .offset(this.offset)
-//             .include("Author", (q) => q.select(["id", "Display_Name"])) 
-//             .noDestroy();
-
-//         return this.query;
-//     }
-
-//     /* --------------------------- Fetch (one-shot) -------------------- */
-
-//     async fetchPosts() {
-//         try {
-//             // Populate the dataset tied to this.query
-//             await this.query.fetch().pipe(window.toMainInstance?.(true) ?? (x => x)).toPromise();
-//             this.renderFromState();
-//         } catch (err) {
-//             console.error("Error fetching forum posts:", err);
-//         }
-//     }
-
-//     renderFromState() {
-//         // Read from the dataset (already filtered/ordered/limited)
-//         const recs = this.query
-//             .getAllRecordsArray()
-//             .slice(0, this.limit);
-
-//         const mappedPosts = mapper(recs);
-//         registerTemplates(mappedPosts);
-//     }
-
-//     /* --------------------------- Live Subscription ------------------- */
-
-//     subscribeToPosts() {
-//         this.unsubscribeAll(); // avoid duplicate streams
-
-//         try {
-//             const liveObs = this.query.subscribe ? this.query.subscribe() : this.query.localSubscribe();
-//             const liveSub = liveObs
-//                 .pipe(window.toMainInstance?.(true) ?? (x => x))
-//                 .subscribe({
-//                     next: (payload) => {
-//                         // payload can be {records: [...] } or just [...]
-//                         const data = Array.isArray(payload?.records)
-//                             ? payload.records
-//                             : Array.isArray(payload)
-//                                 ? payload
-//                                 : [];
-
-//                         const mappedPosts = mapper(data);
-//                         registerTemplates(mappedPosts);
-//                     },
-//                     error: (err) => {
-//                         console.error("Forum live subscription error:", err);
-//                     }
-//                 });
-
-//             this.subscriptions.add(liveSub);
-//         } catch (error) {
-//             console.error("Error setting up forum live subscription:", error);
-//         }
-//     }
-
-//     /* --------------------------- Mutations --------------------------- */
-
-//     async createPost(userData) {
-//         try {
-//             const mutation = this.plugin.mutation().switchTo(this.model);
-//             mutation.createOne({
-//                 published_date: Date.now().toString(),
-//                 author_id: "90",
-//                 copy: userData.copy,
-//             });
-
-//             const result = await mutation.execute(true).toPromise();
-
-//             if (!result.isCancelling) {
-//                 alert("New post created")
-//             } else {
-//                 alert("Error while cancelling the records");
-//             }
-//         } catch (err) {
-//             console.error("Error creating post:", err);
-//             alert("Failed to create the post");
-//         }
-//     }
-
-//     async deletePostById(postId) {
-//         try {
-//             const result = await this.plugin
-//                 .mutation()
-//                 .switchTo(this.model)
-//                 .delete(q => q.where("id", postId))
-//                 .execute(true)
-//                 .toPromise();
-
-//             return result;
-//         } catch (error) {
-//             console.error("Error deleting post:", error);
-//             throw error;
-//         }
-//     }
-
-//     /* --------------------------- Safety Net -------------------------- */
-
-//     setupModelSubscription() {
-//         // Some SDKs emit model-level changes; if so, re-render from state.
-//         const modelUnsub = this.model.subscribe?.({
-//             next: () => this.renderFromState(),
-//             error: (err) => console.error("Model subscription error:", err),
-//         });
-
-//         if (modelUnsub) this.subscriptions.add(modelUnsub);
-//     }
-
-//     /* --------------------------- Utils ------------------------------- */
-
-//     setPaging({ limit = this.limit, offset = this.offset } = {}) {
-//         this.limit = limit;
-//         this.offset = offset;
-//         if (this.query?.destroy) this.query.destroy();
-//         this.buildQuery();
-//         this.fetchPosts();
-//         this.subscribeToPosts();
-//     }
-
-//     unsubscribeAll() {
-//         this.subscriptions.forEach(sub => {
-//             if (typeof sub === "function") sub();        
-//             else sub?.unsubscribe?.();                   
-//         });
-//         this.subscriptions.clear();
-//     }
-// }
-
 export class ForumModel {
-    constructor(plugin, modelName = "EduflowproForumPost") {
+    constructor(plugin) {
         window.plugin = plugin;
-        window.eduflowproForumPostmodel = plugin.switchTo(modelName);
+        window.eduflowproForumPostmodel = plugin.switchTo("EduflowproForumPost");
+        window.forumReactorReactedToForumModal = plugin.switchTo("EduflowproOForumReactorReactedtoForum")
+        window.contactModal = plugin.switchTo("EduflowproContact")
         this.limit = 500;
         this.offset = 0;
         this.query = null;
@@ -186,7 +16,7 @@ export class ForumModel {
     }
 
     async init() {
-        this.buildQuery();
+        this.buildFetchPostQuery();
         await this.fetchPosts();
         this.subscribeToPosts();
         this.setupModelSubscription();
@@ -198,7 +28,7 @@ export class ForumModel {
         this.query = null;
     }
 
-    buildQuery() {
+    buildFetchPostQuery() {
         this.query = eduflowproForumPostmodel
             .query()
             .deSelectAll()
@@ -211,6 +41,9 @@ export class ForumModel {
             .include('Forum_Reactors_Data', q =>
                 q.deSelectAll().select(['id', 'forum_reactor_id', 'reacted_to_forum_id'])
             )
+            .include('ForumComments', q=>{
+                q.deSelectAll().select(['id', 'comment'])
+            })
             .noDestroy();
         return this.query;
     }
@@ -288,15 +121,6 @@ export class ForumModel {
         if (modelUnsub) this.subscriptions.add(modelUnsub);
     }
 
-    setPaging({ limit = this.limit, offset = this.offset } = {}) {
-        this.limit = limit;
-        this.offset = offset;
-        if (this.query?.destroy) this.query.destroy();
-        this.buildQuery();
-        this.fetchPosts();
-        this.subscribeToPosts();
-    }
-
     unsubscribeAll() {
         this.subscriptions.forEach((sub) => {
             if (typeof sub === "function") sub();
@@ -306,7 +130,7 @@ export class ForumModel {
     }
 
     async createVote({Forum_Reactor_ID, Reacted_to_Forum_ID}){
-        let query = plugin.switchTo("EduflowproOForumReactorReactedtoForum").mutation()
+        let query = forumReactorReactedToForumModal.mutation()
         query.createOne({
             forum_reactor_id: Number(Forum_Reactor_ID),
             reacted_to_forum_id: Number(Reacted_to_Forum_ID)
@@ -316,9 +140,28 @@ export class ForumModel {
     }
     
     async deleteVote(id){
-        let query = plugin.switchTo("EduflowproOForumReactorReactedtoForum").mutation()
+        let query = forumReactorReactedToForumModal.mutation()
         query.delete((q) =>q.where("id", id))
         const result = await query.execute(true).toPromise();
+        return result
+    }
+
+    async fetchContacts(){
+        let records = await contactModal.query().fetch()
+            .pipe(window.toMainInstance?.(true) ?? (x => x))
+            .toPromise()
+
+        return records 
+    }
+
+    async createComment({ html, forumId }){
+        let postquery = plugin.switchTo("EduflowproForumComment").mutation()
+        postquery.createOne({
+            comment: html, 
+            forum_post_id: forumId
+        })
+
+        let result = await postquery.execute(true).toPromise();
         return result
     }
 }

@@ -121,7 +121,7 @@
 import { UserConfig } from "../sdk/userConfig.js";
 const user = new UserConfig();
 
-export function mapper(records) {
+export function forumMapper(records) {
   return records.map((item) => ({
     copy: item.copy,
     published_date: item.published_date ?? null,
@@ -131,7 +131,8 @@ export function mapper(records) {
     postId: item.id,
     designation: checkDesignation(item.Author?.is_instructor),
     voteCount: findVoteCount(item.Forum_Reactors_Data) || 0,
-    voteId : getVoteId(item, user.userId)
+    voteId : getVoteId(item, user.userId), 
+    Comment: getAllComments({ item: item, author: item.Author?.display_name ?? "Anonymous"})
   }));
 }
 
@@ -175,3 +176,40 @@ export function checkUserValidation(authorId) {
   return String(authorId) === String(user.userId);
 }
 
+
+export function contactMapper(records){
+  return records.filter(item => (item.display_name != null )).map(item =>({
+    contact_id:item.id,
+    display_name: item.display_name
+  }))
+}
+
+export let tributObj = {
+  trigger: '@',
+  iframe: null,
+  selectClass: 'highlight',
+  selectTemplate: function (item) {
+    const name = item.original.display_name || item.string || '';
+    return `<span input-post-contact-id="${item.original.contact_id}" class="mention"> ${name} </span>`;
+  },
+  menuItemTemplate: function (item) {
+    return item.original.display_name || '';
+  },
+  noMatchTemplate: null,
+  menuContainer: document.body,
+  lookup: 'display_name',
+  fillAttr: 'display_name',
+  values: [],
+  requireLeadingSpace: true,
+  allowSpaces: false
+};
+
+function getAllComments({item, author}){
+  if (item?.ForumComments){
+    return Object.values(item?.ForumComments).map((item) => ({
+      comment: item.comment,
+      author: author, 
+    }))
+  }
+  return null
+}
