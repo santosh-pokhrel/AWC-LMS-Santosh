@@ -1,6 +1,6 @@
 export class UserConfig {
     constructor() {
-        this.userId = window.loggedinuserid ??= 121;
+        this.userId = window.loggedinuserid ??= 90;
 
         // Preferences
         this.preferences = {

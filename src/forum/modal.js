@@ -41,8 +41,13 @@ export class ForumModel {
             .include('Forum_Reactors_Data', q =>
                 q.deSelectAll().select(['id', 'forum_reactor_id', 'reacted_to_forum_id'])
             )
-            .include('ForumComments', q=>{
+            .include('ForumComments', q => {
                 q.deSelectAll().select(['id', 'comment'])
+                    .include('Member_Comment_Upvotes_Data', q => q.deSelectAll().select(['id']))
+                    .include('ForumComments', q => {
+                        q.deSelectAll().select(['id', 'comment'])
+                            .include('Member_Comment_Upvotes_Data', q => q.deSelectAll().select(['id']))
+                    })
             })
             .noDestroy();
         return this.query;
@@ -101,10 +106,10 @@ export class ForumModel {
 
     async deletePostById(postId) {
         try {
-            const result = await 
+            const result = await
                 eduflowproForumPostmodel.mutation().delete((q) => q.where("id", postId))
-                .execute(true)
-                .toPromise();
+                    .execute(true)
+                    .toPromise();
             return result;
         } catch (error) {
             throw error;
@@ -115,9 +120,9 @@ export class ForumModel {
         const modelUnsub = plugin
             .mutation()
             .switchTo("EduflowproForumPost").subscribe?.({
-            next: () => this.renderFromState(),
-            error: () => { }
-        });
+                next: () => this.renderFromState(),
+                error: () => { }
+            });
         if (modelUnsub) this.subscriptions.add(modelUnsub);
     }
 
@@ -129,7 +134,7 @@ export class ForumModel {
         this.subscriptions.clear();
     }
 
-    async createVote({Forum_Reactor_ID, Reacted_to_Forum_ID}){
+    async createVote({ Forum_Reactor_ID, Reacted_to_Forum_ID }) {
         let query = forumReactorReactedToForumModal.mutation()
         query.createOne({
             forum_reactor_id: Number(Forum_Reactor_ID),
@@ -138,27 +143,68 @@ export class ForumModel {
         const result = await query.execute(true).toPromise();
         return result
     }
-    
-    async deleteVote(id){
+
+    async deleteVote(id) {
         let query = forumReactorReactedToForumModal.mutation()
-        query.delete((q) =>q.where("id", id))
+        query.delete((q) => q.where("id", id))
         const result = await query.execute(true).toPromise();
         return result
     }
 
-    async fetchContacts(){
+    async fetchContacts() {
         let records = await contactModal.query().fetch()
             .pipe(window.toMainInstance?.(true) ?? (x => x))
             .toPromise()
 
-        return records 
+        return records
     }
 
-    async createComment({ html, forumId }){
+    async createComment({ html, forumId, authorId }) {
         let postquery = plugin.switchTo("EduflowproForumComment").mutation()
         postquery.createOne({
-            comment: html, 
-            forum_post_id: forumId
+            comment: html,
+            forum_post_id: forumId,
+            authorId: authorId
+        })
+
+        let result = await postquery.execute(true).toPromise();
+        return result
+    }
+
+    async deleteComment(id) {
+        let query = plugin.switchTo("EduflowproForumComment").mutation()
+        query.delete((q) => q.where("id", id))
+
+        let result = await query.execute(true).toPromise();
+        return result
+    }
+
+    async createCommentUpvote(commentId, authorId) {
+        let query = plugin.switchTo("EduflowproMemberCommentUpvotesForumCommentUpvotes").mutation()
+        query.createOne({
+            forum_comment_upvote_id: Number(commentId),
+            member_comment_upvote_id: Number(authorId)
+        })
+
+        let result = await query.execute(true).toPromise();
+        return result;
+    }
+
+    async deleteCommentUpvote(upvoteId) {
+        let query = plugin.switchTo("EduflowproMemberCommentUpvotesForumCommentUpvotes").mutation()
+        query.delete(q => q.where("id", upvoteId))
+
+        let result = await query.execute(true).toPromise();
+        return result
+    }
+
+    async createReplyToComment({ commentId, content, authorId }) {
+        let postquery = plugin.switchTo("EduflowproForumComment").mutation()
+        postquery.createOne({
+            reply_to_comment_id: commentId,
+            comment: content,
+            author_id: authorId
+
         })
 
         let result = await postquery.execute(true).toPromise();
