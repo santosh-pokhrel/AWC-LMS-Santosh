@@ -21,9 +21,13 @@ import { VitalStatsSDK } from "../sdk/init.js";
 import { ForumController } from "../forum/controller.js";
 import { ForumModel } from "../forum/modal.js";
 import { ForumView } from "../forum/views.js";
+import { createLoaderModal } from "../utils/helper.js";
+import { showLoader } from "../utils/helper.js";
 
 (async function bootstrap() {
+    createLoaderModal();
     try {
+        showLoader()
         const { slug, apiKey } = config;
         const sdk = new VitalStatsSDK({ slug, apiKey });
         const plugin = await sdk.initialize();
@@ -38,6 +42,7 @@ import { ForumView } from "../forum/views.js";
             modalRootId: "modal-root",
             postTextareaId: "post-data",
             postButtonId: "post-button",
+            model: model
         });
         const controller = new ForumController(model, view);
 
