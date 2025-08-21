@@ -221,10 +221,24 @@ export class ForumView {
         const file = fileInput.files[0];
         try {
           const file_link = await uploadAndGetFileLink(file);
+          const mime = (file.type || '').toLowerCase();
+          let category = 'File';
+          if (mime.startsWith('image/')) category = 'Image';
+          else if (mime.startsWith('video/')) category = 'Video';
+          else if (mime.startsWith('audio/')) category = 'Audio';
+          else {
+            const ext = (file.name.split('.').pop() || '').toLowerCase();
+            const imageExts = ['jpg','jpeg','png','gif','webp','bmp','svg','heic','heif'];
+            const videoExts = ['mp4','mov','avi','mkv','webm','mpeg','mpg','m4v'];
+            const audioExts = ['mp3','wav','aac','ogg','flac','m4a'];
+            if (imageExts.includes(ext)) category = 'Image';
+            else if (videoExts.includes(ext)) category = 'Video';
+            else if (audioExts.includes(ext)) category = 'Audio';
+          }
           fileMeta = {
             file_name: file.name,
             file_link,
-            file_type: file.type,
+            file_type: category,
             file_size: file.size,
           };
         } catch (err) {
