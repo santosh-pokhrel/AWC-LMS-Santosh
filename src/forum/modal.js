@@ -159,12 +159,16 @@ export class ForumModel {
         return records
     }
 
-    async createComment({ html, forumId, authorId }) {
+    async createComment({ html, forumId, authorId },fileMeta) {
         let postquery = plugin.switchTo("EduflowproForumComment").mutation()
         postquery.createOne({
             comment: html,
             forum_post_id: forumId,
-            authorId: authorId
+            authorId: authorId,
+            file_name : fileMeta?.file_name,
+            file_link: fileMeta?.file_link,
+            file_type: fileMeta?.file_type,
+            file_size: fileMeta?.file_size,
         })
 
         let result = await postquery.execute(true).toPromise();
@@ -198,12 +202,16 @@ export class ForumModel {
         return result
     }
 
-    async createReplyToComment({ commentId, content, authorId }) {
+    async createReplyToComment({ commentId, content, authorId }, fileMeta) {
         let postquery = plugin.switchTo("EduflowproForumComment").mutation()
         postquery.createOne({
             reply_to_comment_id: commentId,
             comment: content,
-            author_id: authorId
+            author_id: authorId,
+            file_name: fileMeta?.file_name,
+            file_link: fileMeta?.file_link,
+            file_type: fileMeta?.file_type,
+            file_size: fileMeta?.file_size
 
         })
 

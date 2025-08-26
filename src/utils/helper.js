@@ -2,7 +2,11 @@ import { UserConfig } from "../sdk/userConfig.js";
 const user = new UserConfig();
 
 export function forumMapper(records) {
+  if(!records || records.length == 0) return
   return records.map((item) => ({
+    fileType: item.file_type ?? null,
+    fileLink: item.file_link ?? null, 
+    fileName: item.file_name?? null,
     copy: item.copy,
     published_date: item.published_date ?? null,
     published_days_ago: item.published_date ? timeAgo(item.published_date) : null,
@@ -66,6 +70,9 @@ function getAllComments({item, author, canDelete}){
   if (item?.ForumComments){
     let x = Object.values(item?.ForumComments).map((item) => {
       return {
+        fileType: item.file_type ?? null,
+        fileLink: item.file_link ?? null,
+        fileName: item.file_name ?? null,
         comment: item.comment,
         author: author,
         id: item.id,
@@ -79,6 +86,9 @@ function getAllComments({item, author, canDelete}){
             author: author, 
             voteCount: item?.Member_Comment_Upvotes_Data?.length || 0,
             voteId: item?.Member_Comment_Upvotes_Data?.[0]?.id,
+            fileType: item.file_type ?? null,
+            fileLink: item.file_link ?? null,
+            fileName: item.file_name ?? null,
           }
         )): []
       };

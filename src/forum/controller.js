@@ -17,6 +17,7 @@ export class ForumController {
                 try {
                     const mapped = forumMapper(records);
                     this.view.renderPosts(mapped);
+                    this.view.initAudioPlayers();
                 } catch (err) {
                     console.error("Error mapping/rendering posts:", err);
                 }
@@ -24,10 +25,11 @@ export class ForumController {
             await this.model.init();
             this.wireEvents();
             await this.tributeHandler();
+            // this.initAudioPlayers();
         } catch (err) {
             console.error("Error initializing ForumController:", err);
-        }finally{
-           hideLoader();
+        } finally {
+            hideLoader();
         }
     }
 
@@ -56,8 +58,8 @@ export class ForumController {
     }
 
     wireEvents() {
-        this.view.onCreatePost(async ({ copy, fileMeta }) => {
-            if (!copy) return alert("Please write something before posting.");
+        this.view.onCreatePost(async ({ copy, fileMeta }, element) => {
+            if (!copy) copy = ""
             try {
                 const result = await this.model.createPost({ authorId: this.currentAuthorId, copy, fileMeta });
                 if (result?.isCancelling) {
@@ -66,15 +68,23 @@ export class ForumController {
                 }
                 alert("New post created");
                 this.view.removeFieldData();
+                document.querySelectorAll(".commentFilePreviewContainer").forEach(el => {
+                    el.innerHTML = "";
+                });
             } catch (err) {
                 console.error("Error creating post:", err);
                 alert("Failed to create post");
             }
+            finally {
+                this.view.disableHTML(element, 'enable');
+                this.view.updateButtons(element, 'initialize');
+            }
         });
 
         this.view.onUpvote(async (payload) => {
+            let { type, postId, commentId, element } = payload;
             try {
-                let { type, postId, commentId } = payload;
+                this.view.disableHTML(element, 'disable');
 
                 if (type == "post") {
                     let btn = document.querySelector(`[data-action="upvote-post"][data-post-id="${postId}"]`);
@@ -146,6 +156,9 @@ export class ForumController {
                 console.error("Error handling upvote:", err);
                 alert("Upvote action failed");
             }
+            finally {
+                this.view.disableHTML(element, 'enable');
+            }
         });
 
         this.view.onCommentButtonClicked(async (postId) => {
@@ -202,10 +215,10 @@ export class ForumController {
             }
         });
 
-        this.view.getCommentValueObj(async (payload, editor) => {
+        this.view.getCommentValueObj(async (payload, fileMeta, element) => {
             try {
                 payload.authorId = this.currentAuthorId;
-                let result = await this.model.createComment(payload);
+                let result = await this.model.createComment(payload, fileMeta);
                 if (!result.isCancelling) {
                     alert("New comment has been created");
                 } else {
@@ -214,13 +227,15 @@ export class ForumController {
             } catch (err) {
                 console.error("Error creating comment:", err);
                 alert("Comment creation failed");
+            } finally {
+                this.view.disableHTML(element, 'enable');
             }
         });
 
-        this.view.getReplyValueObj(async (payload, editor) => {
+        this.view.getReplyValueObj(async (payload, metaData, element) => {
             try {
                 payload.authorId = this.currentAuthorId;
-                let result = await this.model.createReplyToComment(payload);
+                let result = await this.model.createReplyToComment(payload, metaData);
                 if (!result.isCancelling) {
                     alert("New Reply has been created");
                     document.getElementById(`replyForm_${payload.commentId}`).style.setProperty("display", "none");
@@ -230,7 +245,11 @@ export class ForumController {
             } catch (err) {
                 console.error("Error creating reply:", err);
                 alert("Reply failed");
+            } finally {
+                this.view.disableHTML(element, 'enable');
             }
         });
     }
+
+    
 }

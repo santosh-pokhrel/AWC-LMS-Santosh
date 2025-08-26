@@ -1,7 +1,6 @@
 body {
-    margin: 0;
+    margin: 0 auto;
     height: 100vh;
-    width: 100vw;
     overflow-y: unset;
 }
 
@@ -16,11 +15,12 @@ body::-webkit-scrollbar {
 .primaryButton {
     background: #007b8e !important;
     border: 1px solid #007b8e !important;
-    padding: 8px 12px !important;
+    padding: .2rem !important;
     outline: none !important;
     margin: 0 !important;
     border-radius: 4px !important;
     transition: 0.2s ease-in-out;
+    overflow: hidden;
 }
 
 .primaryButton:hover,
@@ -121,7 +121,7 @@ body::-webkit-scrollbar {
     border-radius: 4px;
     border: 1px solid #d1d5db;
     margin-bottom: 1rem;
-    padding: 1rem;
+    padding: .5rem;
     background-color: white;
     width: 100%;
     display: flex;
@@ -140,10 +140,14 @@ body::-webkit-scrollbar {
 
 .create-post-buttons {
     display: flex;
+    flex-direction: row;
+    align-items: center;
     justify-content: flex-end;
-    margin-top: 20px;
     padding: 5px;
     gap: .75rem;
+    flex-wrap: wrap;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 textarea {
@@ -161,6 +165,9 @@ textarea::placeholder {
     opacity: 1;
 }
 
+/* .hidden {
+    display: none !important;
+} */
 
 textarea:focus-visible {
     outline: none;
@@ -175,30 +182,40 @@ textarea:focus-visible {
 
 .attach-file {
     display: flex;
+    flex-direction: row;
     align-items: center;
     gap: .75rem;
     background: transparent !important;
     border: 1px solid #007b8e !important;
-    padding: 8px 12px !important;
+    padding: .5rem;
     outline: none !important;
     margin: 0 !important;
     transition: 0.2s ease-in-out;
     color: #007b8e !important;
     border-radius: 4px !important;
+    overflow: hidden;
+    flex-wrap: wrap;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .post {
+    flex-direction: row;
     gap: .75rem;
     color: white;
     display: flex;
     align-items: center;
     background: #007b8e !important;
     border: 1px solid #007b8e !important;
-    padding: 8px 12px !important;
+    padding: .5rem !important;
     outline: none !important;
     margin: 0 !important;
     border-radius: 4px !important;
     transition: 0.2s ease-in-out;
+    white-space: nowrap;
+    overflow: hidden;
+    flex-wrap: wrap;
+    text-overflow: ellipsis;
 }
 
 .containerForToolbar {
@@ -311,5 +328,102 @@ textarea:focus-visible {
 
     100% {
         transform: rotate(360deg);
+    }
+}
+
+
+/* Audio section */
+/* container: like `grow relative` + centering the slider */
+.range-container {
+    position: relative;
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 40px;
+    /* enough height to center the slider */
+}
+
+.seek {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    width: 100%;
+    height: 2px;
+    background: transparent;
+    cursor: pointer;
+    accent-color: #374151;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+/* WebKit: track + thumb */
+.seek::-webkit-slider-runnable-track {
+    height: 2px;
+    background: #a8b8cf;
+    /* track color */
+    border-radius: 9999px;
+}
+
+.seek::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    background: #007b8e;
+    border-radius: 50%;
+    border: none;
+    margin-top: calc((2px - 12px)/2);
+    /* center thumb on 2px track */
+}
+
+/* Firefox */
+.seek::-moz-range-track {
+    height: 2px;
+    background: #e5e7eb;
+    border-radius: 9999px;
+}
+
+.seek::-moz-range-progress {
+    height: 2px;
+    background: #007b8e;
+    /* played portion in Firefox */
+    border-radius: 9999px;
+}
+
+.seek::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #374151;
+    border: none;
+}
+
+/* Optional: remove focus ring if you don't want it */
+.seek:focus {
+    outline: none;
+}
+
+/* Base = mobile styles (0–480px) go here */
+
+/* Tablet */
+@media (min-width: 481px) and (max-width: 768px) {
+    body {
+        width: 100vw;
+        min-width: fit-content;
+    }
+}
+
+/* Laptop */
+@media (min-width: 769px) and (max-width: 1280px) {
+    /* laptop-specific styles */
+}
+
+/* Desktop / PC */
+@media (min-width: 1281px) {
+    body {
+        width: 100vw;
+        max-width: 50%;
+        
     }
 }
