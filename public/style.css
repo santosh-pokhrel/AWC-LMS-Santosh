@@ -421,9 +421,15 @@ textarea:focus-visible {
 
 /* Desktop / PC */
 @media (min-width: 1281px) {
-    body {
+    /* body {
         width: 100vw;
         max-width: 50%;
         
-    }
+    } */
+}
+
+.activeTab,
+.activePostTab {
+    border-bottom: 2px solid #007b8e;
+    color: #007b8e;
 }

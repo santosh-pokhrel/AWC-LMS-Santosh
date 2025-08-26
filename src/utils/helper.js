@@ -11,6 +11,7 @@ export function forumMapper(records) {
     published_date: item.published_date ?? null,
     published_days_ago: item.published_date ? timeAgo(item.published_date) : null,
     author: item.Author?.display_name ?? "Anonymous",
+    authorId: item.author_id,
     canDelete: checkUserValidation(item.author_id),
     postId: item.id,
     designation: checkDesignation(item.Author?.is_instructor),

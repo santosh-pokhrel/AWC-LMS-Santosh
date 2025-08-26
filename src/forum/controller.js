@@ -9,14 +9,17 @@ export class ForumController {
         this.model = model;
         this.view = view;
         this.currentAuthorId = userIdFromPage;
+        this.myForumPosts = []
+        this.allForumPosts = []
     }
 
     async init() {
         try {
             this.model.onData((records) => {
                 try {
-                    const mapped = forumMapper(records);
-                    this.view.renderPosts(mapped);
+                    this.allForumPosts = forumMapper(records);
+                    this.myForumPosts = this.allForumPosts.filter((item)=>(item.authorId == this.currentAuthorId));
+                    this.view.renderPosts(this.allForumPosts);
                     this.view.initAudioPlayers();
                 } catch (err) {
                     console.error("Error mapping/rendering posts:", err);
@@ -25,7 +28,7 @@ export class ForumController {
             await this.model.init();
             this.wireEvents();
             await this.tributeHandler();
-            // this.initAudioPlayers();
+            this.postsHandler();
         } catch (err) {
             console.error("Error initializing ForumController:", err);
         } finally {
@@ -251,7 +254,19 @@ export class ForumController {
         });
     }
 
-    
-
-    
+    postsHandler(){
+        let myPostBtn = document.getElementById("my-posts-tab");
+        let allPostBtn = document.getElementById("all-posts-tab");
+        allPostBtn.classList.add("activeTab")
+        myPostBtn.addEventListener("click", ()=>{
+            this.view.renderPosts(this.myForumPosts)
+            myPostBtn.classList.add("activeTab")
+            allPostBtn.classList.remove("activeTab")
+        })
+        allPostBtn.addEventListener("click", ()=>{
+            this.view.renderPosts(this.allForumPosts);
+            allPostBtn.classList.add("activeTab")
+            myPostBtn.classList.remove("activeTab")
+        })
+    }
 }
