@@ -33,6 +33,7 @@ body::-webkit-scrollbar {
 }
 
 .upVoted {
+    padding: 5px;
     border: 1px solid #007c8f !important;
     background: #007c8f;
     color: white !important;
