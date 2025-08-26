@@ -8,7 +8,7 @@ export class ForumController {
     constructor(model, view) {
         this.model = model;
         this.view = view;
-        this.currentAuthorId = "90";
+        this.currentAuthorId = userIdFromPage;
     }
 
     async init() {
