@@ -433,3 +433,7 @@ textarea:focus-visible {
     border-bottom: 2px solid #007b8e;
     color: #007b8e;
 }
+
+#allAnnouncementsContainer{
+    justify-content: center;
+}
