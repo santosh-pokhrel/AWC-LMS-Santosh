@@ -1,7 +1,6 @@
 import { forumMapper } from "../utils/helper.js";
 import { tributObj } from "../utils/helper.js";
 import { contactMapper } from "../utils/helper.js";
-import { showLoader } from "../utils/helper.js";
 import { hideLoader } from "../utils/helper.js";
 
 export class ForumController {
@@ -18,11 +17,14 @@ export class ForumController {
             this.model.onData((records) => {
                 try {
                     this.allForumPosts = forumMapper(records);
-                    this.myForumPosts = this.allForumPosts.filter((item)=>(item.authorId == this.currentAuthorId));
+                    this.myForumPosts = this.allForumPosts?.filter((item)=>(item.authorId == this.currentAuthorId));
                     this.view.renderPosts(this.allForumPosts);
                     this.view.initAudioPlayers();
                 } catch (err) {
                     console.error("Error mapping/rendering posts:", err);
+                }finally{
+                    let element = document.getElementById("create-post-section");
+                    this.view.disableHTML(element, 'enable');
                 }
             });
             await this.model.init();
@@ -66,20 +68,19 @@ export class ForumController {
             try {
                 const result = await this.model.createPost({ authorId: this.currentAuthorId, copy, fileMeta });
                 if (result?.isCancelling) {
-                    alert("Error while cancelling the records");
+                    console.log("Error while creating the records");
                     return;
                 }
-                alert("New post created");
+                console.log("New post created");
                 this.view.removeFieldData();
                 document.querySelectorAll(".commentFilePreviewContainer").forEach(el => {
                     el.innerHTML = "";
                 });
             } catch (err) {
                 console.error("Error creating post:", err);
-                alert("Failed to create post");
             }
             finally {
-                this.view.disableHTML(element, 'enable');
+                // this.view.disableHTML(element, 'enable');
                 this.view.updateButtons(element, 'initialize');
             }
         });
@@ -97,15 +98,15 @@ export class ForumController {
                     if (!voteId) {
                         let result = await this.model.createVote({ "Forum_Reactor_ID": this.currentAuthorId, "Reacted_to_Forum_ID": postId });
                         if (result?.isCancelling) {
-                            alert("Error while voting the record");
+                            console.log("Error while voting the record");
                             return;
                         }
-                        alert("Post has been voted");
+                        console.log("Post has been voted");
                         this.view.applyUpvoteStyles(postId, voteId);
                     } else {
                         let result = await this.model.deleteVote(voteId);
                         if (result.isCancelling) {
-                            alert("Error while deleting the vote of the record");
+                            console.log("Error while deleting the vote of the record");
                             return;
                         }
                         this.view.applyUpvoteStyles(postId, '');
@@ -119,18 +120,18 @@ export class ForumController {
                     if (!voteId) {
                         let result = await this.model.createCommentUpvote(commentId, this.currentAuthorId);
                         if (result?.isCancelling) {
-                            alert("Error while voting the record");
+                            console.log("Error while voting the record");
                             return;
                         }
-                        alert("Post has been voted");
+                        console.log("Post has been voted");
                         this.view.applyUpvoteStyles(postId, voteId);
                     } else {
                         let result = await this.model.deleteCommentUpvote(Number(voteId));
                         if (result?.isCancelling) {
-                            alert("Error while voting the comment");
+                            console.log("Error while voting the comment");
                             return;
                         }
-                        alert("upvote has been removed");
+                        console.log("upvote has been removed");
                     }
                 }
                 else if (type == "reply") {
@@ -141,23 +142,22 @@ export class ForumController {
                     if (!voteId) {
                         let result = await this.model.createCommentUpvote(commentId, this.currentAuthorId);
                         if (result?.isCancelling) {
-                            alert("Error while voting the record");
+                            console.log("Error while voting the record");
                             return;
                         }
-                        alert("Post has been voted");
+                        console.log("Post has been voted");
                         this.view.applyUpvoteStyles(postId, voteId);
                     } else {
                         let result = await this.model.deleteCommentUpvote(Number(voteId));
                         if (result?.isCancelling) {
-                            alert("Error while voting the comment");
+                            console.log("Error while voting the reply");
                             return;
                         }
-                        alert("upvote has been removed");
+                        console.log("upvote has been removed");
                     }
                 }
             } catch (err) {
                 console.error("Error handling upvote:", err);
-                alert("Upvote action failed");
             }
             finally {
                 this.view.disableHTML(element, 'enable');
@@ -168,7 +168,7 @@ export class ForumController {
             try {
                 let cmtEl = document.querySelector(`[data-action="toggle-comment"][data-post-id="${postId}"]`);
                 if (!cmtEl) {
-                    alert("Couldn't find comment toggle element");
+                    console.log("Couldn't find comment toggle element");
                 } else {
                     let el = document.querySelector(`.commentForm#commentForm_${postId}`);
                     this.view.toggleCreateForumSection(el);
@@ -184,10 +184,10 @@ export class ForumController {
                 if (type == "comment") {
                     const res = await this.model.deleteComment(commentId);
                     if (!res.isCancelling) {
-                        alert("comment has been deleted");
+                        console.log("comment has been deleted");
                         this.view.removePostNode(commentId);
                     } else {
-                        alert("Delete failed");
+                        console.log("Delete failed");
                     }
                 }
                 if (type == "post") {
@@ -195,12 +195,11 @@ export class ForumController {
                     if (!res.isCancelling) {
                         this.view.removePostNode(postId);
                     } else {
-                        alert("Delete failed");
+                        console.log("Delete failed");
                     }
                 }
             } catch (err) {
                 console.error("Error deleting:", err);
-                alert("Delete failed");
             }
         });
 
@@ -208,7 +207,7 @@ export class ForumController {
             try {
                 let replyEl = document.querySelector(`[data-action="toggle-reply"][data-comment-id="${commentId}"]`);
                 if (!replyEl) {
-                    alert("Couldn't find reply toggle element");
+                    console.log("Couldn't find reply toggle element");
                 } else {
                     let el = document.querySelector(`.ReplyForm#replyForm_${commentId}`);
                     this.view.toggleCreateForumSection(el);
@@ -223,13 +222,12 @@ export class ForumController {
                 payload.authorId = this.currentAuthorId;
                 let result = await this.model.createComment(payload, fileMeta);
                 if (!result.isCancelling) {
-                    alert("New comment has been created");
+                    console.log("New comment has been created");
                 } else {
-                    alert("Comment creation failed");
+                    console.log("Comment creation failed");
                 }
             } catch (err) {
                 console.error("Error creating comment:", err);
-                alert("Comment creation failed");
             } finally {
                 this.view.disableHTML(element, 'enable');
             }
@@ -240,14 +238,13 @@ export class ForumController {
                 payload.authorId = this.currentAuthorId;
                 let result = await this.model.createReplyToComment(payload, metaData);
                 if (!result.isCancelling) {
-                    alert("New Reply has been created");
+                    console.log("New Reply has been created");
                     document.getElementById(`replyForm_${payload.commentId}`).style.setProperty("display", "none");
                 } else {
-                    alert("Reply failed");
+                    console.log("Reply failed");
                 }
             } catch (err) {
                 console.error("Error creating reply:", err);
-                alert("Reply failed");
             } finally {
                 this.view.disableHTML(element, 'enable');
             }

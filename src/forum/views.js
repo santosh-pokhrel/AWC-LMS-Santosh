@@ -471,7 +471,7 @@ export class ForumView {
             file_size: classified.file_size,
           };
         } catch (err) {
-          alert('File upload failed: ' + err.message);
+          console.log('File upload failed: ' + err.message);
           return;
         }
       }
@@ -711,7 +711,7 @@ export class ForumView {
             file_size: classified.file_size,
           };
         } catch (err) {
-          alert('File upload failed: ' + err.message);
+          console.log('File upload failed: ' + err.message);
           return;
         }
       }
@@ -772,7 +772,7 @@ export class ForumView {
             file_size: classified.file_size,
           };
         } catch (err) {
-          alert('File upload failed: ' + err.message);
+          console.log('File upload failed: ' + err.message);
           return;
         }
       }

@@ -68,9 +68,13 @@ export class ForumModel {
     subscribeToPosts() {
         this.unsubscribeAll();
         try {
-            const liveObs = this.query.subscribe ? this.query.subscribe() : this.query.localSubscribe();
-            const liveSub = liveObs
-                .pipe(window.toMainInstance?.(true) ?? ((x) => x))
+            let liveObs
+            if (this.query.subscribe) {
+                liveObs = this.query.subscribe()
+            } else {
+                liveObs = this.query.localSubscribe()
+            }
+            const liveSub = liveObs.pipe(window.toMainInstance?.(true) ?? ((x) => x))
                 .subscribe({
                     next: (payload) => {
                         const data = Array.isArray(payload?.records)
@@ -78,13 +82,14 @@ export class ForumModel {
                             : Array.isArray(payload)
                                 ? payload
                                 : [];
-                        if (this.dataCallback) this.dataCallback(data);
+                        if (this.dataCallback) requestAnimationFrame(() => this.dataCallback(data));
                     },
                     error: () => { }
                 });
             this.subscriptions.add(liveSub);
         } catch { }
     }
+
 
     async createPost({ authorId, copy, fileMeta }) {
         let postquery = eduflowproForumPostmodel.mutation()
@@ -117,12 +122,12 @@ export class ForumModel {
     }
 
     setupModelSubscription() {
-        const modelUnsub = plugin
-            .mutation()
-            .switchTo("EduflowproForumPost").subscribe?.({
-                next: () => this.renderFromState(),
-                error: () => { }
-            });
+        const modelUnsub = eduflowproForumPostmodel.subscribe?.({
+            next: (data) => {
+                // this.renderFromState()
+            },
+            error: () => { }
+        });
         if (modelUnsub) this.subscriptions.add(modelUnsub);
     }
 
@@ -159,13 +164,13 @@ export class ForumModel {
         return records
     }
 
-    async createComment({ html, forumId, authorId },fileMeta) {
+    async createComment({ html, forumId, authorId }, fileMeta) {
         let postquery = plugin.switchTo("EduflowproForumComment").mutation()
         postquery.createOne({
             comment: html,
             forum_post_id: forumId,
             authorId: authorId,
-            file_name : fileMeta?.file_name,
+            file_name: fileMeta?.file_name,
             file_link: fileMeta?.file_link,
             file_type: fileMeta?.file_type,
             file_size: fileMeta?.file_size,
@@ -219,5 +224,3 @@ export class ForumModel {
         return result
     }
 }
-
-
