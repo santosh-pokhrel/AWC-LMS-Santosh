@@ -241,7 +241,7 @@ export class ForumView {
 
         <!-- REPLIES -->
         <div id="comments-{{:id}}" class="mt-4">
-            {{for replies}}
+            {{for replies ~commentId=id ~postId=~postId}}
             <div id="{{:id}}" current-post-id="{{:id}}"
                 class="ml-3 mt-2 p-2 border-l-[1px] border-[#007c8f] commentCard">
                 <div class="cursor-pointer actionToggleButton relative w-max ml-auto">
@@ -314,6 +314,15 @@ export class ForumView {
                         </svg>
                         <div class="text-label vote-count">{{:voteCount}}</div>
                     </button>
+                    <div
+                      class="text-[#007b8e] text-label cursor-pointer reply-toggle"
+                      data-action="toggle-reply"
+                      data-comment-id="{{:~commentId}}"
+                      role="button"
+                      tabindex="0"
+                    >
+                      Reply
+                    </div>
                 </div>
             </div>
             {{/for}}
