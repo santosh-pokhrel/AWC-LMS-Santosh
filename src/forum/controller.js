@@ -172,6 +172,7 @@ export class ForumController {
                 } else {
                     let el = document.querySelector(`.commentForm#commentForm_${postId}`);
                     this.view.toggleCreateForumSection(el);
+                    this.view.implementToolbarEffect();
                 }
             } catch (err) {
                 console.error("Error toggling comment form:", err);
@@ -211,6 +212,9 @@ export class ForumController {
                 } else {
                     let el = document.querySelector(`.ReplyForm#replyForm_${commentId}`);
                     this.view.toggleCreateForumSection(el);
+                    if (!el.classList.contains('hidden')) {
+                        this.view.implementToolbarEffect();
+                    } 
                 }
             } catch (err) {
                 console.error("Error toggling reply form:", err);

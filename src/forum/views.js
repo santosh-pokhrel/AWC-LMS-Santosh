@@ -25,6 +25,7 @@ export class ForumView {
     this.initCommentReplyToggles();
     this.attachFileBtnHandler();
     this.deleteAttachFileHandler();
+    this.implementToolbarEffect();
   }
 
   ensureTemplate() {
@@ -476,6 +477,7 @@ export class ForumView {
         }
       }
       if (!(fileInput && fileInput.files && fileInput.files[0]) && !copy) {
+        this.showEmptyModal("Post cannot be empty !");
         this.disableHTML(elementToDisable, 'enable');
         return
       }
@@ -609,10 +611,6 @@ export class ForumView {
   removePostNode(postId) {
     const node = this.mount?.querySelector(`[current-post-id='${postId}']`);
     node?.remove();
-  }
-
-  removeCommentNOde(commentId) {
-    const node = this.mount?.querySelector("")
   }
 
   openDeleteModal({ onConfirm }) {
@@ -868,17 +866,18 @@ export class ForumView {
 
   show(el) {
     if (el) {
-      el.classList.remove("hidden");
-      el.classList.add("inline-flex");
+      el.classList.remove("!hidden");
+      el.classList.add("!inline-flex");
     }
   }
 
   hide(el) {
     if (el) {
-      el.classList.add("hidden");
-      el.classList.remove("inline-flex");
+      el.classList.remove("!inline-flex");
+      el.classList.add("!hidden");
     }
   }
+
 
   updateButtons(element, state) {
     const { attachBtn, replaceBtn, deleteBtn } = this.getActionButtons(element);
@@ -935,7 +934,7 @@ export class ForumView {
       preview.innerHTML = "";
       preview.appendChild(player);
       this.initAudioPlayers(preview);
-    }else {
+    } else {
       // generic fallback (pdf/doc/etc.) — no links to avoid blob/data URL issues
       const fallback = document.createElement("div");
       fallback.style.setProperty("color", "rgb(59 130 246 / var(--tw-text-opacity, 1))");
@@ -1116,6 +1115,68 @@ export class ForumView {
         a.remove();
       });
     });
+  }
+
+  showEmptyModal(message, duration = 3000) {
+    let modal = document.querySelector(".empty-modal");
+    let modalContent;
+    if (!modal) {
+      modal = document.createElement("div");
+      modal.className = "empty-modal";
+      modalContent = document.createElement("div");
+      modalContent.className = "empty-modal-content";
+      modalContent.id = "dynamicModalMessage";
+      modal.appendChild(modalContent);
+      document.body.appendChild(modal);
+    } else {
+      modalContent = document.getElementById("dynamicModalMessage");
+    }
+
+    modalContent.textContent = message;
+    modal.classList.add("show");
+    setTimeout(() => {
+      modal.classList.remove("show");
+    }, duration);
+  }
+
+  implementToolbarEffect(){
+    document.querySelectorAll(".containerForToolbar button").forEach(button => {
+      // Check if listener is already applied
+      if (button.dataset.listenerAdded) return;
+
+      button.addEventListener("click", (e) => {
+        const action = button.title.toLowerCase(); // bold, italic, underline, add link
+
+        // Find nearest contenteditable below toolbar
+        const editor = button.closest(".containerForToolbar")
+          .nextElementSibling.querySelector("[contenteditable='true']");
+        if (!editor) return;
+
+        editor.focus(); // focus editor before execCommand
+
+        switch (action) {
+          case "bold":
+            document.execCommand("bold");
+            break;
+          case "italic":
+            document.execCommand("italic");
+            break;
+          case "underline":
+            document.execCommand("underline");
+            break;
+          case "add link":
+            const url = prompt("Enter URL:", "https://");
+            if (!url) return;
+            document.execCommand("createLink", false, url);
+            break;
+        }
+      });
+
+      // Mark this button as having a listener
+      button.dataset.listenerAdded = "true";
+    });
+
+
   }
 
 }
