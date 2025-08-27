@@ -347,7 +347,7 @@ export class ForumView {
                 <div class="commentFilePreviewContainer mt-2"></div>
                 <div class="create-post-buttons">
                     <input id="postFile-{{:#data.id}}" name="postFile" type="file" class="sr-only" />
-                    <label for="postFile-{{:#data.id}}" data-action="https://github.com/santosh-pokhrel/AWC-LMS-Santosh/actions"
+                    <label for="postFile-{{:#data.id}}" data-action="replace-button"
                         class="create-post-buttons attach-file inline-flex items-center gap-2 cursor-pointer border rounded px-3 py-2 !hidden">
                         <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path
