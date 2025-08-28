@@ -96,7 +96,9 @@ export class ForumModel {
         const payload = {
             published_date: Math.floor(Date.now() / 1000).toString(),
             author_id: authorId,
-            copy: copy
+            copy: copy,
+            // Ensure the optimistic record matches the live query filter
+            forum_status: 'Published - Not flagged'
         };
         if (fileMeta && fileMeta.file_link) {
             payload.file_name = fileMeta.file_name;
